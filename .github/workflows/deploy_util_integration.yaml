@@ -43,6 +43,8 @@ jobs:
         dir: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
       max-parallel: 4
       fail-fast: false
+    env:
+      full_path: "utilities/tpds_utils/${{ matrix.dir }}"
     steps:
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
@@ -60,13 +62,13 @@ jobs:
       
       - name: install requirements
         run: |
-          pip install -r utilities/tpds_utils/${{ matrix.dir }}/requirements.txt
+          pip install -r ${full_path}/requirements.txt
 
       - name: create layer zip file
         run: |
           mkdir python
           cp -r create_layer/lib python/
-          cp -r utilities/tpds_utils/${{ matrix.dir }} python/
+          cp -r ${full_path} python/
           zip -r layer_content.zip python
       
       - name: upload the layer
