@@ -21,10 +21,6 @@ jobs:
       - name: Base SHA
         id: base-sha
         run: echo "sha=$(git rev-parse origin/main)" >> $GITHUB_OUTPUT
-        
-      - name: Base SHA output
-        id: base-sha-output
-        run: echo "sha=$(git rev-parse origin/main)" 
 
       - name: Get changed files
         id: changed-files
@@ -35,6 +31,10 @@ jobs:
           dir_names_max_depth: 3
           json: true
           quotepath: false
+      
+      - name: Print changed filed
+        id: print-changed-files
+        run: echo ${{ steps.changed-files.outputs.all_changed_files }}
       
       - name: 'Set output in the matrix format'
         id: set-output
