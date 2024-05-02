@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      
+      - name: Change directory to tpds_utils
         run: cd utilities/tpds_utils
 
       - name: Base SHA
