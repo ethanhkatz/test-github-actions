@@ -32,7 +32,7 @@ jobs:
           json: true
           quotepath: false
       
-      - name: Print changed filed
+      - name: Print changed files
         id: print-changed-files
         run: echo ${{ steps.changed-files.outputs.all_changed_files }}
       
@@ -43,7 +43,6 @@ jobs:
   deploy:
     name: Deploy to Int
     runs-on: ubuntu-latest
-    if: ${{ needs.find-out-changes.outputs.changed_directories != '' }}  # Without it, the strategy parser will fail if the changed_directories is empty.
 
     strategy:
       matrix: ${{fromJson(needs.find-out-changes.outputs.changed_directories)}}
