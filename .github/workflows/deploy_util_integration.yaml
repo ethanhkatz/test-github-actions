@@ -25,14 +25,23 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v35
         with:
+          base_sha: main
           dir_names: true
+          dir_names_max_depth: 1
+          json: true
+          quotepath: false
+      
+      - name: 'Set output in the matrix format'
+        id: set-output
+        run: echo "changed_directories={\"dir\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy to Int
     runs-on: ubuntu-latest
+    if: ${{ needs.find-out-changes.outputs.changed_directories != '' }}  # Without it, the strategy parser will fail if the changed_directories is empty.
 
     strategy:
-      matrix: ${{fromJson(needs.find-out-changes.outputs.dirs)}}
+      matrix: ${{fromJson(needs.find-out-changes.outputs.changed_directories)}}
     needs:
       - find-out-changes
 
@@ -44,4 +53,5 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
-      - run: echo ${{ matrix.dir }}
+      - name: output directory
+        run: echo ${{ matrix.dir }}
