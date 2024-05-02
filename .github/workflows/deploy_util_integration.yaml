@@ -60,19 +60,18 @@ jobs:
       
       - name: install requirements
         run: |
-          echo utilities/tpds_utils/#{{ matrix.dir }}/requirements.txt
-          pip install -r utilities/tpds_utils/#{{ matrix.dir }}/requirements.txt
+          pip install -r utilities/tpds_utils/${{ matrix.dir }}/requirements.txt
 
       - name: create layer zip file
         run: |
           mkdir python
           cp -r create_layer/lib python/
-          cp -r utilities/tpds_utils/#{{ matrix.dir }} python/
+          cp -r utilities/tpds_utils/${{ matrix.dir }} python/
           zip -r layer_content.zip python
       
       - name: upload the layer
         run: |
-          aws lambda publish-layer-version --layer-name #{{ matrix.dir }} \
+          aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
               --zip-file fileb://layer_content.zip \
               --compatible-runtimes python3.11 \
               --compatible-architectures "arm64"
