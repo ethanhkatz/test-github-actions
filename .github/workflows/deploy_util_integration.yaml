@@ -44,8 +44,34 @@ jobs:
       max-parallel: 4
       fail-fast: false
     steps:
+      - name: Setup python version 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
       - name: checkout
         uses: actions/checkout@v4
 
-      - name: output directory
-        run: echo ${{ matrix.dir }}
+      - name: create venv
+        run: |
+          pip install --upgrade pip
+          python3.11 -m venv create_layer
+          source create_layer/bin/activate
+      
+      - name: install requirements
+        run: |
+          pip install -r utilities/tpds_utils/#{{ matrix.dir }}/requirements.txt
+
+      - name: create layer zip file
+        run: |
+          mkdir python
+          cp -r create_layer/lib python/
+          cp -r utilities/tpds_utils/#{{ matrix.dir }} python/
+          zip -r layer_content.zip python
+      
+      - name: upload the layer
+        run: |
+          aws lambda publish-layer-version --layer-name #{{ matrix.dir }} \
+              --zip-file fileb://layer_content.zip \
+              --compatible-runtimes python3.11 \
+              --compatible-architectures "arm64"
