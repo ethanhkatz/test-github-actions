@@ -8,9 +8,32 @@ on:
       - "utilities/tpds_utils/**"
 
 jobs:
+  find-out-changes:
+    name: Find out changes
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.changed-files.dirs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        run:
+          cd utilities/tpds_utils
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          dir_names: true
+
   deploy:
     name: Deploy to Int
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix: ${{fromJson(needs.find-out-changes.outputs.dirs)}}
+    needs:
+      - find-out-changes
 
     permissions:
       id-token: write
@@ -19,44 +42,5 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        run:
-          cd utilities/tpds_utils
 
-      - name: Set up python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.11
-
-      - name: Get changed directories
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-
-            recommendations:
-              - 'lambdas/Recommendations/*'
-
-      - name: Configure tpg_main credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::606105707499:role/TpdsBuildDeployRole
-          aws-region: us-west-2
-
-      - name: Deploy Recommendations
-        if: steps.changes.outputs.recommendations == 'true'
-        env:
-          environment: Int
-          directory: Recommendations
-          function: IntDSBookingsRecommenderLambda
-          pipeline: DSPipelineBookings
-          bucket: tpg-main-lambda
-        run: |
-          file_name="${GITHUB_SHA}.zip"
-          cd ./lambdas/$directory/
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -t .
-          zip -r9 $file_name *
-          aws s3 cp $file_name s3://$bucket/$pipeline/$directory/$environment/$file_name
-          aws lambda update-function-code --function-name $function --s3-bucket $bucket --s3-key $pipeline/$directory/$environment/$file_name
-          rm $file_name
-          cd ../../
+      - run: echo ${{ matrix.dir }}
