@@ -60,6 +60,7 @@ jobs:
       
       - name: install requirements
         run: |
+          echo utilities/tpds_utils/#{{ matrix.dir }}/requirements.txt
           pip install -r utilities/tpds_utils/#{{ matrix.dir }}/requirements.txt
 
       - name: create layer zip file
