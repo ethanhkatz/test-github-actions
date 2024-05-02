@@ -18,9 +18,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Change directory to tpds_utils
-        run: cd utilities/tpds_utils
 
       - name: Get Base SHA
         id: base-sha
@@ -32,7 +29,7 @@ jobs:
         with:
           base_sha: "${{ steps.base-sha.outputs.sha }}"
           dir_names: true
-          dir_names_max_depth: 3
+          dir_names_max_depth: 1
           matrix: true
           path: utilities/tpds_utils
       
