@@ -68,7 +68,7 @@ jobs:
         run: |
           mkdir python
           cp -r create_layer/lib python/
-          cp -r ${full_path} python/
+          rsync -av --exclude '${full_path}/requirements.txt' ${full_path} python/
           zip -r layer_content.zip python
       
       - name: upload the layer
