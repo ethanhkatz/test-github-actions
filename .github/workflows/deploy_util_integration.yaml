@@ -22,7 +22,7 @@ jobs:
       - name: Change directory to tpds_utils
         run: cd utilities/tpds_utils
 
-      - name: Base SHA
+      - name: Get Base SHA
         id: base-sha
         run: echo "sha=$(git rev-parse origin/main)" >> $GITHUB_OUTPUT
 
@@ -34,6 +34,7 @@ jobs:
           dir_names: true
           dir_names_max_depth: 3
           matrix: true
+          path: utilities/tpds_utils
       
       - name: List all changed files
         run: echo '${{ steps.changed-files.outputs.all_changed_files }}'
