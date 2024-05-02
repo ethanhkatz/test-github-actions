@@ -16,8 +16,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      - name: Fetch main
+        run: git fetch origin main --depth 1
 
       - name: Get Base SHA
         id: base-sha
