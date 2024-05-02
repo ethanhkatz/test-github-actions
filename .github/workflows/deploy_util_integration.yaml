@@ -1,0 +1,62 @@
+name: Int - Deploy Utils to Lambda
+
+on:
+  push:
+    tags:
+      - "util*"
+    paths:
+      - "utilities/tpds_utils/**"
+
+jobs:
+  deploy:
+    name: Deploy to Int
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        run:
+          cd utilities/tpds_utils
+
+      - name: Set up python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11
+
+      - name: Get changed directories
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+
+            recommendations:
+              - 'lambdas/Recommendations/*'
+
+      - name: Configure tpg_main credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::606105707499:role/TpdsBuildDeployRole
+          aws-region: us-west-2
+
+      - name: Deploy Recommendations
+        if: steps.changes.outputs.recommendations == 'true'
+        env:
+          environment: Int
+          directory: Recommendations
+          function: IntDSBookingsRecommenderLambda
+          pipeline: DSPipelineBookings
+          bucket: tpg-main-lambda
+        run: |
+          file_name="${GITHUB_SHA}.zip"
+          cd ./lambdas/$directory/
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -t .
+          zip -r9 $file_name *
+          aws s3 cp $file_name s3://$bucket/$pipeline/$directory/$environment/$file_name
+          aws lambda update-function-code --function-name $function --s3-bucket $bucket --s3-key $pipeline/$directory/$environment/$file_name
+          rm $file_name
+          cd ../../
