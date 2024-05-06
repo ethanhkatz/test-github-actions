@@ -57,9 +57,7 @@ jobs:
       - name: Read version for filename
         id: getversion
         working-directory: .
-        run: |
-          echo "$(ls)"
-          echo "filename=$(cat utilities/${{ matrix.dir }}/version.txt).zip" >> $GITHUB_OUTPUT
+        run: echo "filename=$(cat version.txt)" >> $GITHUB_OUTPUT
 
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
