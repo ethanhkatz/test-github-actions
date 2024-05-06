@@ -52,9 +52,12 @@ jobs:
         working-directory: utilities/${{ matrix.dir }}
     env:
       environment: Int
-      file_name: $(cat version.txt).zip
       bucket: tpg-main-lambda
     steps:
+      - name: Read version for filename
+        id: getversion
+        run: echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
+
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
         with:
@@ -78,12 +81,12 @@ jobs:
           mkdir python
           cp -r create_layer/lib python/
           rsync -av --exclude-from='exclude_list.txt' ${full_path} python/
-          zip -r $file_name python
+          zip -r ${{ steps.getversion.outputs.filename }} python
       
       - name: Upload the layer
         run: |
-          S3_key=layers/$environment/${{ matrix.dir }}/$file_name
-          aws s3 cp $file_name s3://$bucket/$S3_key
+          S3_key=layers/$environment/${{ matrix.dir }}/${{ steps.getversion.outputs.filename }}
+          aws s3 cp ${{ steps.getversion.outputs.filename }} s3://$bucket/$S3_key
           aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
               --content S3Bucket=$bucket,S3Key=$S3_key \
               --compatible-runtimes python3.11 \
