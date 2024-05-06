@@ -38,7 +38,7 @@ jobs:
     name: Deploy to Int
     runs-on: ubuntu-latest
     needs: [changed-files]
-    if: ${{ needs.changed-files.outputs.matrix != '' }}  # Without it, the strategy parser will fail if the changed_directories is empty.
+    if: ${{ needs.changed-files.outputs.matrix != '[]' }}  # Without it, the strategy parser will fail if the changed_directories is empty.
     strategy:
       matrix:
         dir: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
