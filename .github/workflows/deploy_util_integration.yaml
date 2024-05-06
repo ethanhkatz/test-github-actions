@@ -52,7 +52,7 @@ jobs:
         working-directory: utilities/${{ matrix.dir }}
     env:
       environment: Int
-      bucket: tpg-main-lambda
+      bucket: tpg-ds
     steps:
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
@@ -74,12 +74,12 @@ jobs:
           pip install -r requirements.txt
           mkdir python
           cp -r create_layer/lib python/
-          rsync -av --exclude-from='exclude_list.txt' --exclude python/ . python/
+          rsync -av --exclude-from='exclude_list.txt' --exclude python --exclude create_layer . python
           zip -r ${{ steps.getversion.outputs.filename }} python
       
       - name: Upload the layer
         run: |
-          S3_key=layers/$environment/${{ matrix.dir }}/${{ steps.getversion.outputs.filename }}
+          S3_key=$environment/layers/${{ matrix.dir }}/${{ steps.getversion.outputs.filename }}
           aws s3 cp ${{ steps.getversion.outputs.filename }} s3://$bucket/$S3_key
           aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
               --content S3Bucket=$bucket,S3Key=$S3_key \
