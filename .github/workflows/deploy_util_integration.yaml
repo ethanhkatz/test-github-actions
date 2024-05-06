@@ -56,7 +56,9 @@ jobs:
     steps:
       - name: Read version for filename
         id: getversion
-        run: echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
+        run: |
+          echo $(ls)
+          echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
 
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
