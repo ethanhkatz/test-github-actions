@@ -52,7 +52,7 @@ jobs:
         working-directory: utilities/${{ matrix.dir }}
     env:
       environment: Int
-      file_name: `cat version.txt`.zip
+      file_name: $(cat version.txt).zip
       bucket: tpg-main-lambda
     steps:
       - name: Setup python version 3.11
