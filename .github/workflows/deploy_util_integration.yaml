@@ -80,7 +80,7 @@ jobs:
         run: |
           mkdir python
           cp -r create_layer/lib python/
-          rsync -av --exclude-from='exclude_list.txt' . python/
+          rsync -av --exclude-from='exclude_list.txt' --exclude python/ . python/
           zip -r ${{ steps.getversion.outputs.filename }} python
       
       - name: Upload the layer
