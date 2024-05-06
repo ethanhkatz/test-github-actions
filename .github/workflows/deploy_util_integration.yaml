@@ -64,20 +64,14 @@ jobs:
 
       - name: Read version for filename
         id: getversion
-        run: echo "filename=$(cat version.txt)" >> $GITHUB_OUTPUT
+        run: echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
 
-      - name: Create venv
+      - name: Create layer zip file
         run: |
           pip install --upgrade pip
           python3.11 -m venv create_layer
           source create_layer/bin/activate
-      
-      - name: Install requirements
-        run: |
           pip install -r requirements.txt
-
-      - name: Create layer zip file
-        run: |
           mkdir python
           cp -r create_layer/lib python/
           rsync -av --exclude-from='exclude_list.txt' --exclude python/ . python/
