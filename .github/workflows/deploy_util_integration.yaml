@@ -32,7 +32,7 @@ jobs:
           dir_names: true
           dir_names_max_depth: 1
           matrix: true
-          path: utilities # only get changes in utilities folder
+          path: utilities
 
   deploy:
     name: Deploy to Int
