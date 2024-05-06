@@ -47,8 +47,13 @@ jobs:
         dir: ${{ fromJSON(needs.changed-files.outputs.utilities_changed) }}
       max-parallel: 4
       fail-fast: false
+    defaults:
+      run:
+        working-directory: utilities/${{ matrix.dir }}
     env:
-      full_path: "utilities/${{ matrix.dir }}"
+      environment: Int
+      file_name: `cat version.txt`.zip
+      bucket: tpg-main-lambda
     steps:
       - name: Setup python version 3.11
         uses: actions/setup-python@v4
@@ -66,24 +71,20 @@ jobs:
       
       - name: Install requirements
         run: |
-          pip install -r ${full_path}/requirements.txt
+          pip install -r requirements.txt
 
       - name: Create layer zip file
         run: |
           mkdir python
           cp -r create_layer/lib python/
-          rsync -av --exclude '${full_path}/requirements.txt' ${full_path} python/
-          zip -r layer_content.zip python
-      
-      - name: Configure tpg_main credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::606105707499:role/TpdsBuildDeployRole
-          aws-region: us-west-2
+          rsync -av --exclude-from='exclude_list.txt' ${full_path} python/
+          zip -r $file_name python
       
       - name: Upload the layer
         run: |
+          S3_key=layers/$environment/${{ matrix.dir }}/$file_name
+          aws s3 cp $file_name s3://$bucket/$S3_key
           aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
-              --zip-file fileb://layer_content.zip \
+              --content S3Bucket=$bucket,S3Key=$S3_key \
               --compatible-runtimes python3.11 \
               --compatible-architectures "arm64"
