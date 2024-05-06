@@ -58,7 +58,7 @@ jobs:
         id: getversion
         working-directory: .
         run: |
-          echo $(ls)
+          echo "$(ls)"
           echo "filename=$(cat utilities/${{ matrix.dir }}/version.txt).zip" >> $GITHUB_OUTPUT
 
       - name: Setup python version 3.11
