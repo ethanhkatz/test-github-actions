@@ -48,6 +48,7 @@ jobs:
           environment: Int
           bucket: tpg-ds
         run: |
+          echo ${{ steps.changed-utilities.outputs.any_changed }}
           pip install --upgrade pip
           IFS=' ' read -ra DIRS <<< "${{ steps.changed-utilities.outputs.all_changed_files }}"
           for dir_name in "${DIRS[@]}"; do
