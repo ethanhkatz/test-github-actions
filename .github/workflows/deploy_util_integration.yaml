@@ -8,15 +8,11 @@ on:
       - "utilities/tpds_utils/**"
 
 jobs:
-  main-job:
-    name: Main job
+  changed-files:
+    name: Get changed files
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      environment: Int
-      bucket: tpg-ds
+    outputs:
+      utilities_changed: ${{ steps.changed-utilities.outputs.all_changed_files }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,13 +33,20 @@ jobs:
           dir_names_max_depth: 1
           path: utilities # only get changes in utilities folder
 
+  deploy:
+    name: Deploy to Int
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: [changed-files]
+    env:
+      environment: Int
+      bucket: tpg-ds
+    steps:
       - name: debug
         run: |
-          echo ${{ steps.changed-utilities.outputs.all_changed_files }}
-          IFS=' ' read -ra DIRS <<< "${{ steps.changed-utilities.outputs.all_changed_files }}"
-          for dir_name in "${DIRS[@]}"; do
-            echo $dir_name
-          done
+          echo ${{ needs.changed-files.outputs.utilities_changed }}
 
       # - name: Setup python version 3.11
       #   uses: actions/setup-python@v4
