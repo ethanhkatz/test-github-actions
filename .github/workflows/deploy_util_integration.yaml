@@ -46,7 +46,6 @@ jobs:
     steps:
       - name: debug
         run: |
-          echo ${{ fromJSON(needs.changed-files.outputs.utilities_changed) }}
           echo needs.changed-files.outputs.utilities_changed
 
       # - name: Setup python version 3.11
