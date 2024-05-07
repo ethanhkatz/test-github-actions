@@ -51,23 +51,20 @@ jobs:
           pip install --upgrade pip
           IFS=' ' read -ra DIRS <<< "${{ steps.changed-utilities.outputs.all_changed_files }}"
           for dir_name in "${DIRS[@]}"; do
-            if [[ $dir_name == "utilities/tpds_"* ]]; then
-              cd $dir_name
-              library_name="$($dir_name#utilities/)"
-              file_name="$(cat version.txt).zip"
-              python3.11 -m venv create_layer
-              source create_layer/bin/activate
-              pip install -r requirements.txt
-              mkdir python
-              cp -r create_layer/lib python/
-              rsync -av --exclude-from='exclude_list.txt' --exclude python --exclude create_layer . python
-              zip -r $file_name python
-              S3_key=$environment/layers/$library_name/$file_name
-              # aws s3 cp $file_name s3://$bucket/$S3_key
-              # aws lambda publish-layer-version --layer-name $library_name \
-              #     --content S3Bucket=$bucket,S3Key=$S3_key \
-              #     --compatible-runtimes python3.11 \
-              #     --compatible-architectures "arm64"
-              cd ../../
-            fi
+            cd utilities/$dir_name
+            file_name="$(cat version.txt).zip"
+            python3.11 -m venv create_layer
+            source create_layer/bin/activate
+            pip install -r requirements.txt
+            mkdir python
+            cp -r create_layer/lib python/
+            rsync -av --exclude-from='exclude_list.txt' --exclude python --exclude create_layer . python
+            zip -r $file_name python
+            S3_key=$environment/layers/$dir_name/$file_name
+            # aws s3 cp $file_name s3://$bucket/$S3_key
+            # aws lambda publish-layer-version --layer-name $dir_name \
+            #     --content S3Bucket=$bucket,S3Key=$S3_key \
+            #     --compatible-runtimes python3.11 \
+            #     --compatible-architectures "arm64"
+            cd ../../
           done
