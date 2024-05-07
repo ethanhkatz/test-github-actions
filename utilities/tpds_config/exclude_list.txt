@@ -1,3 +1,4 @@
-requirements.txt
-version.txt
-exclude_list.txt
+tpds_config/requirements.txt
+tpds_config/utils_requirements.txt
+tpds_config/version.txt
+tpds_config/exclude_list.txt
