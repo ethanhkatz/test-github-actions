@@ -31,7 +31,6 @@ jobs:
           base_sha: "${{ steps.base-sha.outputs.sha }}"
           dir_names: true
           dir_names_max_depth: 1
-          matrix: true
           path: utilities # only get changes in utilities folder
 
   deploy:
@@ -41,47 +40,43 @@ jobs:
       id-token: write
       contents: read
     needs: [changed-files]
-    if: ${{ needs.changed-files.outputs.utilities_changed != '[]' }}  # Without it, the strategy parser will fail if the matrix is empty.
-    strategy:
-      matrix:
-        dir: ${{ fromJSON(needs.changed-files.outputs.utilities_changed) }}
-      max-parallel: 4
-      fail-fast: false
-    defaults:
-      run:
-        working-directory: utilities/${{ matrix.dir }}
     env:
       environment: Int
       bucket: tpg-ds
     steps:
-      - name: Setup python version 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Read version for filename
-        id: getversion
-        run: echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
-
-      - name: Create layer zip file
+      - name: debug
         run: |
-          pip install --upgrade pip
-          python3.11 -m venv create_layer
-          source create_layer/bin/activate
-          pip install -r requirements.txt
-          mkdir python
-          cp -r create_layer/lib python/
-          rsync -av --exclude-from='exclude_list.txt' --exclude python --exclude create_layer . python
-          zip -r ${{ steps.getversion.outputs.filename }} python
+          echo ${{ fromJSON(needs.changed-files.outputs.utilities_changed) }}
+          echo needs.changed-files.outputs.utilities_changed
+
+      # - name: Setup python version 3.11
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.11
+
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+
+      # - name: Read version for filename
+      #   id: getversion
+      #   run: echo "filename=$(cat version.txt).zip" >> $GITHUB_OUTPUT
+
+      # - name: Create layer zip file
+      #   run: |
+      #     pip install --upgrade pip
+      #     python3.11 -m venv create_layer
+      #     source create_layer/bin/activate
+      #     pip install -r requirements.txt
+      #     mkdir python
+      #     cp -r create_layer/lib python/
+      #     rsync -av --exclude-from='exclude_list.txt' --exclude python --exclude create_layer . python
+      #     zip -r ${{ steps.getversion.outputs.filename }} python
       
-      - name: Upload the layer
-        run: |
-          S3_key=$environment/layers/${{ matrix.dir }}/${{ steps.getversion.outputs.filename }}
-          aws s3 cp ${{ steps.getversion.outputs.filename }} s3://$bucket/$S3_key
-          aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
-              --content S3Bucket=$bucket,S3Key=$S3_key \
-              --compatible-runtimes python3.11 \
-              --compatible-architectures "arm64"
+      # - name: Upload the layer
+      #   run: |
+      #     S3_key=$environment/layers/${{ matrix.dir }}/${{ steps.getversion.outputs.filename }}
+      #     aws s3 cp ${{ steps.getversion.outputs.filename }} s3://$bucket/$S3_key
+      #     aws lambda publish-layer-version --layer-name ${{ matrix.dir }} \
+      #         --content S3Bucket=$bucket,S3Key=$S3_key \
+      #         --compatible-runtimes python3.11 \
+      #         --compatible-architectures "arm64"
