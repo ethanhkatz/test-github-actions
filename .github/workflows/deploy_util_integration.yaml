@@ -70,3 +70,4 @@ jobs:
               #     --compatible-architectures "arm64"
               cd ../../
             fi
+          done
