@@ -76,4 +76,6 @@ jobs:
             #     --compatible-runtimes python3.11 \
             #     --compatible-architectures "arm64"
             rm -r python
+            rm -r create_layer
+            rm $file_name
           done
