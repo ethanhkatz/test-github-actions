@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: debug
         run: |
-          echo needs.changed-files.outputs.utilities_changed
+          echo ${{ needs.changed-files.outputs.utilities_changed }}
 
       # - name: Setup python version 3.11
       #   uses: actions/setup-python@v4
