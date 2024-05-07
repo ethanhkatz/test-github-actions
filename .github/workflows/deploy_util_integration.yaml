@@ -43,6 +43,7 @@ jobs:
           IFS=' ' read -ra DIRS <<< "${{ steps.changed-utilities.outputs.all_changed_files }}"
           for dir_name in "${DIRS[@]}"; do
             echo $dir_name
+          done
 
       # - name: Setup python version 3.11
       #   uses: actions/setup-python@v4
