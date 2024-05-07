@@ -43,7 +43,7 @@ jobs:
           python-version: 3.11
 
       - name: Deploy utilities
-        if: ${{ steps.changed-utilities.outputs.any_changed }} == true
+        if: ${{ steps.changed-utilities.outputs.any_changed == true }}
         env:
           environment: Int
           bucket: tpg-ds
