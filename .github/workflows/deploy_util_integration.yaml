@@ -5,7 +5,7 @@ on:
     tags:
       - "util*"
     paths:
-      - "utilities/tpds_utils/**"
+      - "utilities/**"
 
 jobs:
   main-job:
@@ -43,7 +43,7 @@ jobs:
           python-version: 3.11
 
       - name: Deploy utilities
-        if: ${{ steps.changed-utilities.outputs.all_changed_files }} != ""
+        if: "${{ steps.changed-utilities.outputs.all_changed_files }}" != ""
         env:
           environment: Int
           bucket: tpg-ds
