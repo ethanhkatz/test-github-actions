@@ -1,0 +1,70 @@
+name: Prd - Snowflake Deploy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  main-job:
+    name: Main job
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # for changed-utilities to retrieve the previous commit
+
+      - name: Get changed utilities
+        id: changed-utilities
+        uses: tj-actions/changed-files@v44
+        with:
+          dir_names: true
+          dir_names_max_depth: 1
+          path: utilities # only get changes in utilities folder
+
+      - name: Setup python version 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Deploy utilities
+        if: ${{ steps.changed-utilities.outputs.any_changed == 'true' }}
+        env:
+          environment: Prd
+          bucket: tpg-ds-db-exports
+        run: |
+          pip install --upgrade pip
+          cd utilities
+          recursive_install () { # Parameter 1 is the directory to install into the "python" directory
+            if [ ! -d "python/$1" ]; then # if directory already exists then we don't need to do it again
+              pip install -r "$1/requirements.txt"
+              rsync -av --exclude-from="$1/exclude_list.txt" $1 python
+              while IFS="" read -r line || [ -n "$line" ]
+              do
+                recursive_install "$line"
+              done <"$1/utils_requirements.txt"
+            fi
+          }
+          IFS=' ' read -ra DIRS <<< "${{ steps.changed-utilities.outputs.all_changed_files }}"
+          for dir_name in "${DIRS[@]}"; do
+            mkdir python
+            python3.11 -m venv create_layer
+            source create_layer/bin/activate
+            recursive_install $dir_name
+            cp -r create_layer/lib python/
+            file_name="$(cat $dir_name/version.txt).zip"
+            zip -r9q $file_name python
+            S3_key=$environment/layers/$dir_name/$file_name
+            # aws s3 cp $file_name s3://$bucket/$S3_key
+            # aws lambda publish-layer-version --layer-name $dir_name \
+            #     --content S3Bucket=$bucket,S3Key=$S3_key \
+            #     --compatible-runtimes python3.11 \
+            #     --compatible-architectures "arm64"
+            deactivate
+            rm -r python
+            rm -r create_layer
+            rm $file_name
+          done

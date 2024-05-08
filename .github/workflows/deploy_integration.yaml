@@ -14,9 +14,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    env:
-      environment: Int
-      bucket: tpg-ds
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +25,7 @@ jobs:
         id: base-sha
         run: echo "sha=$(git rev-parse origin/main)" >> $GITHUB_OUTPUT # SHA of master
 
-      - name: Get changed files
+      - name: Get changed utilities
         id: changed-utilities
         uses: tj-actions/changed-files@v44
         with:
@@ -68,7 +65,7 @@ jobs:
             recursive_install $dir_name
             cp -r create_layer/lib python/
             file_name="$(cat $dir_name/version.txt).zip"
-            zip -r $file_name python
+            zip -r9q $file_name python
             S3_key=$environment/layers/$dir_name/$file_name
             # aws s3 cp $file_name s3://$bucket/$S3_key
             # aws lambda publish-layer-version --layer-name $dir_name \
