@@ -18,12 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch master
-        run: git fetch origin main --depth 1
-
       - name: Get base SHA
         id: base-sha
-        run: echo "sha=$(git rev-parse origin/main)" >> $GITHUB_OUTPUT # SHA of master
+        run: |
+          git fetch origin main --depth 1
+          echo "sha=$(git rev-parse origin/main)" >> $GITHUB_OUTPUT # SHA of master
 
       - name: Get changed utilities
         id: changed-utilities
