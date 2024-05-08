@@ -2,7 +2,7 @@ name: Prd - Snowflake Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   main-job:
