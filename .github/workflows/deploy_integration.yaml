@@ -47,4 +47,18 @@ jobs:
           pip install --upgrade pip
           cd utilities
           python tester.py "${{ steps.changed-utilities.outputs.all_changed_files }}"
-          
+          while read p; do
+            layer_name=$(echo $p | cut -d " " -f1)
+            layer_dirs=$(echo $p | cut -d " " -f2-)
+            python -m venv create_layer
+            source create_layer/bin/activate
+            IFS=' ' read -ra DIRS <<< $layer_dirs
+            for dir_name in "${DIRS[@]}"; do
+              pip install ./$dir_name
+            done
+            file_name="${{ github.sha }}.zip"
+            zip -r9q $file_name create_layer/lib
+            deactivate
+            rm -r create_layer
+            rm $file_name
+          done <layers_to_build.txt
