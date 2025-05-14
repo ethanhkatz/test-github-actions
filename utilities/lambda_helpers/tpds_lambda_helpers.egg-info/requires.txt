@@ -1,0 +1,3 @@
+tpds_logger@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/logger
+tpds_config@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/config
+tpds_env_var@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/env_var

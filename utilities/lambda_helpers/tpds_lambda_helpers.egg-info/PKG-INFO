@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: tpds_lambda_helpers
+Version: 1.1.4
+Requires-Dist: tpds_logger@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/logger
+Requires-Dist: tpds_config@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/config
+Requires-Dist: tpds_env_var@ file://localhost/Users/ethankatz/repos/beast/utilities/libraries/env_var
